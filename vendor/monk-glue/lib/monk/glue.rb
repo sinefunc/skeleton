@@ -5,8 +5,8 @@ ROOT_DIR = $0 unless defined? ROOT_DIR
 # Helper method for file references.
 #
 # @param args [Array] Path components relative to ROOT_DIR.
-# @example Referencing a file in config called settings.yml:
-#   root_path("config", "settings.yml")
+# @example Referencing a file in config called appconfig.yml:
+#   root_path("config", "appconfig.yml")
 def root_path(*args)
   File.join(ROOT_DIR, *args)
 end
@@ -43,4 +43,4 @@ class Monk::Glue < Sinatra::Base
 end
 
 require "monk/glue/logger"
-require "monk/glue/settings"
+require "monk/glue/appconfig"
