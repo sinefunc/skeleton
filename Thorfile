@@ -50,7 +50,7 @@ private
   end
 
   def verify_config(env)
-    verify "config/settings.example.yml"
+    verify "config/appconfig.example.yml"
     verify "config/redis/#{env}.example.conf"
   end
 
