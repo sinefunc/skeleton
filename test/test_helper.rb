@@ -6,6 +6,7 @@ require "rack/test"
 require "contest"
 require "override"
 require "quietbacktrace"
+require "random_data"
 
 class Test::Unit::TestCase
   include Rack::Test::Methods

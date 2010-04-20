@@ -1,6 +1,6 @@
 contest 0.1.2 (test) git://github.com/citrusbyte/contest.git
 dependencies git://github.com/djanowski/dependencies.git
-ffaker 0.3.5 git://github.com/EmmanuelOga/ffaker.git
+random_data git://github.com/sinefunc/random_data.git
 haml 2.2.22 git://github.com/nex3/haml.git
 monk-glue git://github.com/sinefunc/glue.git
 ohm 0.0.34 git://github.com/soveran/ohm.git
