@@ -23,6 +23,18 @@ class Monk < Thor
     end
   end
 
+  desc "test_routes", "Run all route tests"
+  def test_routes
+    verify_config(:test)
+
+    $:.unshift File.join(File.dirname(__FILE__), "test")
+
+    Dir['test/routes/**/*_test.rb'].each do |file|
+      load file unless file =~ /^-/
+    end
+  end
+
+
   desc "stories", "Run user stories."
   method_option :pdf, :type => :boolean
   def stories
