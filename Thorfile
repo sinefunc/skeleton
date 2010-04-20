@@ -39,6 +39,13 @@ class Monk < Thor
     File.exists?(example) ? copy_file(example, target) : say_status(:missing, example)
   end
 
+  desc "redis ENV", "Start the redis server in the supplied environment"
+  def redis(env = ENV['RACK_ENV'] || 'development')
+    verify_config env
+    
+    exec "redis-server config/redis/#{env}.conf"
+  end
+
 private
 
   def self.source_root
