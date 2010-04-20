@@ -7,14 +7,17 @@ require "contest"
 require "override"
 require "quietbacktrace"
 require "random_data"
+require "spawn"
+require "factories"
 
 class Test::Unit::TestCase
   include Rack::Test::Methods
+  include Rtopia
 
   def setup
-    # Uncomment if you want to reset the database
+    # Comment if you don't want to reset the database
     # before each test.
-    # Ohm.flush
+    Ohm.flush
   end
 
   def app

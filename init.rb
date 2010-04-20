@@ -12,10 +12,12 @@ require "monk/glue"
 require "ohm"
 require "haml"
 require "less"
+require "rtopia"
 
 class Main < Monk::Glue
-  set :app_file, __FILE__
-  use Rack::Session::Cookie
+  set     :app_file, __FILE__
+  use     Rack::Session::Cookie
+  helpers Rtopia
 end
 
 # Connect to redis database.

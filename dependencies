@@ -4,7 +4,8 @@ dependencies git://github.com/djanowski/dependencies.git
 random_data git://github.com/sinefunc/random_data.git
 haml 2.2.22 git://github.com/nex3/haml.git
 monk-glue git://github.com/sinefunc/glue.git
-ohm 0.0.34 git://github.com/soveran/ohm.git
+redis-rb 1.0.4 git://github.com/ezmobius/redis-rb.git
+ohm 0.0.35 git://github.com/soveran/ohm.git
 override 0.0.10 (test) git://github.com/soveran/override.git
 quietbacktrace 0.1.1 git://github.com/thoughtbot/quietbacktrace.git
 rack 1.1.0 git://github.com/rack/rack.git
@@ -17,3 +18,4 @@ treetop 1.4.5
 polyglot 0.3.1
 mutter 0.5.3
 less 1.2.21 git://github.com/cloudhead/less.js.git
+rtopia 0.1.1 git://github.com/sinefunc/rtopia.git
