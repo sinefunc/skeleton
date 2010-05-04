@@ -30,14 +30,15 @@ class Test::Unit::TestCase
     end
   end
 
-  def self.context(name, &block)
+  def self.context(*name, &block)
     subclass = Class.new(self)
     remove_tests(subclass)
     subclass.class_eval(&block) if block_given?
-    const_set(context_name(name), subclass)
+    const_set(context_name(name.join(" ")), subclass)
   end
 
   def self.test(name, &block)
+    block ||= lambda { pend(name) }
     define_method(test_name(name), &block)
   end
 

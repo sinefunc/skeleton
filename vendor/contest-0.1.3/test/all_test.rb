@@ -19,6 +19,12 @@ class FooTest < Test::Unit::TestCase
     end
   end
 
+  context "context", "with multiple", "arguments", 123, FooTest do
+    should "run the test inside" do
+      assert_equal 1, @value
+    end
+  end
+
   context "some context" do
     setup do
       @value += 1
@@ -74,7 +80,7 @@ class BarTest < Test::Unit::TestCase
       assert_equal 2, @value
     end
 
-    test "another truth" do
+    test "yet another truth" do
       assert_equal 2, @value
     end
   end
@@ -121,4 +127,16 @@ class TestBaz < Test::Unit::TestCase
   end
 
   context "empty context"
+
+  context "some context with a pending test" do
+    def pend(str)
+      @pending = str
+    end
+
+    teardown do
+      assert_equal "do this and that", @pending
+    end
+
+    should "do this and that"
+  end
 end
