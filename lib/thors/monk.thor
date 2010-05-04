@@ -65,13 +65,17 @@ class Monk < Thor
   def redis(env = ENV['RACK_ENV'] || 'development')
     verify_config env
     
-    exec "redis-server config/redis/#{env}.conf"
+    exec "redis-server #{root_path}/config/redis/#{env}.conf"
   end
 
 private
-
+  
   def self.source_root
     File.dirname(__FILE__)
+  end
+  
+  def root_path
+    File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
   end
 
   def target_file_for(example_file)
@@ -79,8 +83,8 @@ private
   end
 
   def verify_config(env)
-    verify "config/appconfig.example.yml"
-    verify "config/redis/#{env}.example.conf"
+    verify "#{root_path}/config/appconfig.example.yml"
+    verify "#{root_path}/config/redis/#{env}.example.conf"
   end
 
   def verify(example)
