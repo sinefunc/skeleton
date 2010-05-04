@@ -6,4 +6,12 @@ class SanityCheckTest < Test::Unit::TestCase
   end
 
   should "be able to provide pending specs"
+
+  should "be able to load redis" do
+    require 'redis'
+  end
+
+  should "be able to load ohm" do
+    require 'ohm'
+  end
 end

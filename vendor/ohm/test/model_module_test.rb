@@ -3,71 +3,73 @@
 require File.join(File.dirname(__FILE__), "test_helper")
 require "ostruct"
 
-class Post < Ohm::Model
-  attribute :body
-  list :comments
-  list :related, Post
-end
-
-class User < Ohm::Model
-  attribute :email
-  set :posts, Post
-end
-
-class Person < Ohm::Model
-  attribute :name
-  index :initial
-
-  def validate
-    assert_present :name
+module Model
+  class Post < Ohm::Model
+    attribute :body
+    list :comments
+    list :related, Post
   end
 
-  def initial
-    name[0, 1].upcase
+  class User < Ohm::Model
+    attribute :email
+    set :posts, Post
+  end
+
+  class Person < Ohm::Model
+    attribute :name
+    index :initial
+
+    def validate
+      assert_present :name
+    end
+
+    def initial
+      name[0, 1].upcase
+    end
+  end
+
+  class Event < Ohm::Model
+    attribute :name
+    counter :votes
+    set :attendees, Person
+
+    attribute :slug
+
+    def write
+      self.slug = name.to_s.downcase
+      super
+    end
   end
 end
 
-class Event < Ohm::Model
-  attribute :name
-  counter :votes
-  set :attendees, Person
-
-  attribute :slug
-
-  def write
-    self.slug = name.to_s.downcase
-    super
-  end
-end
-
-class TestRedis < Test::Unit::TestCase
+class ScopedModelsTest < Test::Unit::TestCase
   setup do
     Ohm.flush
   end
 
   context "An event initialized with a hash of attributes" do
     should "assign the passed attributes" do
-      event = Event.new(:name => "Ruby Tuesday")
+      event = Model::Event.new(:name => "Ruby Tuesday")
       assert_equal event.name, "Ruby Tuesday"
     end
   end
 
   context "An event created from a hash of attributes" do
     should "assign an id and save the object" do
-      event1 = Event.create(:name => "Ruby Tuesday")
-      event2 = Event.create(:name => "Ruby Meetup")
+      event1 = Model::Event.create(:name => "Ruby Tuesday")
+      event2 = Model::Event.create(:name => "Ruby Meetup")
 
       assert_equal "1", event1.id
       assert_equal "2", event2.id
     end
 
     should "return the unsaved object if validation fails" do
-      assert Person.create(:name => nil).kind_of?(Person)
+      assert Model::Person.create(:name => nil).kind_of?(Model::Person)
     end
   end
 
   context "An event updated from a hash of attributes" do
-    class Meetup < Ohm::Model
+    class ::Model::Meetup < Ohm::Model
       attribute :name
       attribute :location
 
@@ -77,40 +79,40 @@ class TestRedis < Test::Unit::TestCase
     end
 
     should "assign an id and save the object" do
-      event = Meetup.create(:name => "Ruby Tuesday")
+      event = Model::Meetup.create(:name => "Ruby Tuesday")
       event.update(:name => "Ruby Meetup")
       assert_equal "Ruby Meetup", event.name
     end
 
     should "return false if the validation fails" do
-      event = Meetup.create(:name => "Ruby Tuesday")
+      event = Model::Meetup.create(:name => "Ruby Tuesday")
       assert !event.update(:name => nil)
     end
 
     should "save the attributes in UTF8" do
-     event = Meetup.create(:name => "32° Kisei-sen")
-     assert_equal "32° Kisei-sen", Meetup[event.id].name
+     event = Model::Meetup.create(:name => "32° Kisei-sen")
+     assert_equal "32° Kisei-sen", Model::Meetup[event.id].name
     end
 
     should "delete the attribute if set to nil" do
-      event = Meetup.create(:name => "Ruby Tuesday", :location => "Los Angeles")
-      assert_equal "Los Angeles", Meetup[event.id].location
+      event = Model::Meetup.create(:name => "Ruby Tuesday", :location => "Los Angeles")
+      assert_equal "Los Angeles", Model::Meetup[event.id].location
       assert event.update(:location => nil)
-      assert_equal nil, Meetup[event.id].location
+      assert_equal nil, Model::Meetup[event.id].location
     end
 
     should "delete the attribute if set to an empty string" do
-      event = Meetup.create(:name => "Ruby Tuesday", :location => "Los Angeles")
-      assert_equal "Los Angeles", Meetup[event.id].location
+      event = Model::Meetup.create(:name => "Ruby Tuesday", :location => "Los Angeles")
+      assert_equal "Los Angeles", Model::Meetup[event.id].location
       assert event.update(:location => "")
-      assert_equal nil, Meetup[event.id].location
+      assert_equal nil, Model::Meetup[event.id].location
     end
   end
 
   context "Model definition" do
     should "not raise if an attribute is redefined" do
       assert_nothing_raised do
-        class RedefinedModel < Ohm::Model
+        class ::Model::RedefinedModel < Ohm::Model
           attribute :name
           attribute :name
         end
@@ -119,7 +121,7 @@ class TestRedis < Test::Unit::TestCase
 
     should "not raise if a counter is redefined" do
       assert_nothing_raised do
-        class RedefinedModel < Ohm::Model
+        class ::Model::RedefinedModel < Ohm::Model
           counter :age
           counter :age
         end
@@ -128,7 +130,7 @@ class TestRedis < Test::Unit::TestCase
 
     should "not raise if a list is redefined" do
       assert_nothing_raised do
-        class RedefinedModel < Ohm::Model
+        class ::Model::RedefinedModel < Ohm::Model
           list :todo
           list :todo
         end
@@ -137,7 +139,7 @@ class TestRedis < Test::Unit::TestCase
 
     should "not raise if a set is redefined" do
       assert_nothing_raised do
-        class RedefinedModel < Ohm::Model
+        class ::Model::RedefinedModel < Ohm::Model
           set :friends
           set :friends
         end
@@ -146,7 +148,7 @@ class TestRedis < Test::Unit::TestCase
 
     should "not raise if a collection is redefined" do
       assert_nothing_raised do
-        class RedefinedModel < Ohm::Model
+        class ::Model::RedefinedModel < Ohm::Model
           list :toys
           set :toys
         end
@@ -155,7 +157,7 @@ class TestRedis < Test::Unit::TestCase
 
     should "not raise if a index is redefined" do
       assert_nothing_raised do
-        class RedefinedModel < Ohm::Model
+        class ::Model::RedefinedModel < Ohm::Model
           attribute :color
           index :color
           index :color
@@ -166,40 +168,40 @@ class TestRedis < Test::Unit::TestCase
 
   context "Finding an event" do
     setup do
-      Ohm.redis.sadd("Event:all", 1)
-      Ohm.redis.set("Event:1:name", "Concert")
+      Ohm.redis.sadd("Model::Event:all", 1)
+      Ohm.redis.set("Model::Event:1:name", "Concert")
     end
 
     should "return an instance of Event" do
-      assert Event[1].kind_of?(Event)
-      assert_equal 1, Event[1].id
-      assert_equal "Concert", Event[1].name
+      assert Model::Event[1].kind_of?(Model::Event)
+      assert_equal 1, Model::Event[1].id
+      assert_equal "Concert", Model::Event[1].name
     end
   end
 
   context "Finding a user" do
     setup do
-      Ohm.redis.sadd("User:all", 1)
-      Ohm.redis.set("User:1:email", "albert@example.com")
+      Ohm.redis.sadd("Model::User:all", 1)
+      Ohm.redis.set("Model::User:1:email", "albert@example.com")
     end
 
     should "return an instance of User" do
-      assert User[1].kind_of?(User)
-      assert_equal 1, User[1].id
-      assert_equal "albert@example.com", User[1].email
+      assert Model::User[1].kind_of?(Model::User)
+      assert_equal 1, Model::User[1].id
+      assert_equal "albert@example.com", Model::User[1].email
     end
 
     should "allow to map ids to models" do
-      assert_equal [User[1]], [1].map(&User)
+      assert_equal [Model::User[1]], [1].map(&Model::User)
     end
   end
 
   context "Updating a user" do
     setup do
-      Ohm.redis.sadd("User:all", 1)
-      Ohm.redis.set("User:1:email", "albert@example.com")
+      Ohm.redis.sadd("Model::User:all", 1)
+      Ohm.redis.set("Model::User:1:email", "albert@example.com")
 
-      @user = User[1]
+      @user = Model::User[1]
     end
 
     should "change its attributes" do
@@ -214,16 +216,16 @@ class TestRedis < Test::Unit::TestCase
       @user.email = "maria@example.com"
       @user.save
 
-      assert_equal "maria@example.com", User[1].email
+      assert_equal "maria@example.com", Model::User[1].email
     end
   end
 
   context "Creating a new model" do
     should "assign a new id to the event" do
-      event1 = Event.new
+      event1 = Model::Event.new
       event1.create
 
-      event2 = Event.new
+      event2 = Model::Event.new
       event2.create
 
       assert !event1.new?
@@ -236,23 +238,23 @@ class TestRedis < Test::Unit::TestCase
 
   context "Saving a model" do
     should "create the model if it is new" do
-      event = Event.new(:name => "Foo").save
-      assert_equal "Foo", Event[event.id].name
+      event = Model::Event.new(:name => "Foo").save
+      assert_equal "Foo", Model::Event[event.id].name
     end
 
     should "save it only if it was previously created" do
-      event = Event.new
+      event = Model::Event.new
       event.name = "Lorem ipsum"
       event.create
 
       event.name = "Lorem"
       event.save
 
-      assert_equal "Lorem", Event[event.id].name
+      assert_equal "Lorem", Model::Event[event.id].name
     end
 
     should "allow to hook into write" do
-      event = Event.create(:name => "Foo")
+      event = Model::Event.create(:name => "Foo")
 
       assert_equal "foo", event.slug
     end
@@ -260,13 +262,13 @@ class TestRedis < Test::Unit::TestCase
 
   context "Delete" do
     should "delete an existing model" do
-      class ModelToBeDeleted < Ohm::Model
+      class ::Model::ModelToBeDeleted < Ohm::Model
         attribute :name
         set :foos
         list :bars
       end
 
-      @model = ModelToBeDeleted.create(:name => "Lorem")
+      @model = Model::ModelToBeDeleted.create(:name => "Lorem")
 
       @model.foos << "foo"
       @model.bars << "bar"
@@ -275,43 +277,43 @@ class TestRedis < Test::Unit::TestCase
 
       @model.delete
 
-      assert_nil Ohm.redis.get(ModelToBeDeleted.key(id))
-      assert_nil Ohm.redis.get(ModelToBeDeleted.key(id, :name))
-      assert_equal Array.new, Ohm.redis.smembers(ModelToBeDeleted.key(id, :foos))
-      assert_equal Array.new, Ohm.redis.lrange(ModelToBeDeleted.key(id, :bars), 0, -1)
+      assert_nil Ohm.redis.get(Model::ModelToBeDeleted.key(id))
+      assert_nil Ohm.redis.get(Model::ModelToBeDeleted.key(id, :name))
+      assert_equal Array.new, Ohm.redis.smembers(Model::ModelToBeDeleted.key(id, :foos))
+      assert_equal Array.new, Ohm.redis.lrange(Model::ModelToBeDeleted.key(id, :bars), 0, -1)
 
-      assert ModelToBeDeleted.all.empty?
+      assert Model::ModelToBeDeleted.all.empty?
     end
 
     should "be no leftover keys" do
-      class ::Foo < Ohm::Model
+      class ::Model::Foo < Ohm::Model
         attribute :name
         index :name
       end
 
       assert_equal [], Ohm.redis.keys("*")
 
-      Foo.create(:name => "Bar")
+      Model::Foo.create(:name => "Bar")
 
-      assert_equal ["Foo:1:_indices", "Foo:1:name", "Foo:all", "Foo:id", "Foo:name:QmFy"], Ohm.redis.keys("*").sort
+      assert_equal ["Model::Foo:1:_indices", "Model::Foo:1:name", "Model::Foo:all", "Model::Foo:id", "Model::Foo:name:QmFy"], Ohm.redis.keys("*").sort
 
-      Foo[1].delete
+      Model::Foo[1].delete
 
-      assert_equal ["Foo:id"], Ohm.redis.keys("*")
+      assert_equal ["Model::Foo:id"], Ohm.redis.keys("*")
     end
   end
 
   context "Listing" do
     should "find all" do
-      event1 = Event.new
+      event1 = Model::Event.new
       event1.name = "Ruby Meetup"
       event1.create
 
-      event2 = Event.new
+      event2 = Model::Event.new
       event2.name = "Ruby Tuesday"
       event2.create
 
-      all = Event.all
+      all = Model::Event.all
 
       assert all.detect {|e| e.name == "Ruby Meetup" }
       assert all.detect {|e| e.name == "Ruby Tuesday" }
@@ -320,72 +322,72 @@ class TestRedis < Test::Unit::TestCase
 
   context "Sorting" do
     should "sort all" do
-      Person.create :name => "D"
-      Person.create :name => "C"
-      Person.create :name => "B"
-      Person.create :name => "A"
+      Model::Person.create :name => "D"
+      Model::Person.create :name => "C"
+      Model::Person.create :name => "B"
+      Model::Person.create :name => "A"
 
-      assert_equal %w[A B C D], Person.all.sort_by(:name, :order => "ALPHA").map { |person| person.name }
+      assert_equal %w[A B C D], Model::Person.all.sort_by(:name, :order => "ALPHA").map { |person| person.name }
     end
 
     should "return an empty array if there are no elements to sort" do
-      assert_equal [], Person.all.sort_by(:name)
+      assert_equal [], Model::Person.all.sort_by(:name)
     end
 
     should "return the first element sorted by id when using first" do
-      Person.create :name => "A"
-      Person.create :name => "B"
-      assert_equal "A", Person.all.first.name
+      Model::Person.create :name => "A"
+      Model::Person.create :name => "B"
+      assert_equal "A", Model::Person.all.first.name
     end
 
     should "return the first element sorted by name if first receives a sorting option" do
-      Person.create :name => "B"
-      Person.create :name => "A"
-      assert_equal "A", Person.all.first(:by => :name, :order => "ALPHA").name
+      Model::Person.create :name => "B"
+      Model::Person.create :name => "A"
+      assert_equal "A", Model::Person.all.first(:by => :name, :order => "ALPHA").name
     end
 
     should "return attribute values when the get parameter is specified" do
-      Person.create :name => "B"
-      Person.create :name => "A"
+      Model::Person.create :name => "B"
+      Model::Person.create :name => "A"
 
-      assert_equal "A", Person.all.sort_by(:name, :get => :name, :order => "ALPHA").first
+      assert_equal "A", Model::Person.all.sort_by(:name, :get => :name, :order => "ALPHA").first
     end
   end
 
   context "Loading attributes" do
     setup do
-      event = Event.new
+      event = Model::Event.new
       event.name = "Ruby Tuesday"
       @id = event.create.id
     end
 
     should "load attributes lazily" do
-      event = Event[@id]
+      event = Model::Event[@id]
 
       assert_nil event.send(:instance_variable_get, "@name")
       assert_equal "Ruby Tuesday", event.name
     end
 
     should "load attributes as a strings" do
-      event = Event.create(:name => 1)
+      event = Model::Event.create(:name => 1)
 
-      assert_equal "1", Event[event.id].name
+      assert_equal "1", Model::Event[event.id].name
     end
   end
 
   context "Attributes of type Set" do
     setup do
-      @person1 = Person.create(:name => "Albert")
-      @person2 = Person.create(:name => "Bertrand")
-      @person3 = Person.create(:name => "Charles")
+      @person1 = Model::Person.create(:name => "Albert")
+      @person2 = Model::Person.create(:name => "Bertrand")
+      @person3 = Model::Person.create(:name => "Charles")
 
-      @event = Event.new
+      @event = Model::Event.new
       @event.name = "Ruby Tuesday"
     end
 
     should "not be available if the model is new" do
       assert_raise Ohm::Model::MissingID do
-        @event.attendees << Person.new
+        @event.attendees << Model::Person.new
       end
     end
 
@@ -396,7 +398,7 @@ class TestRedis < Test::Unit::TestCase
       @event.attendees << @person3
       assert_equal ["1", "2", "3"], @event.attendees.raw.sort
       @event.attendees.delete(@person2)
-      assert_equal ["1", "3"], Event[@event.id].attendees.raw.sort
+      assert_equal ["1", "3"], Model::Event[@event.id].attendees.raw.sort
     end
 
     should "return true if the set includes some member" do
@@ -456,7 +458,7 @@ class TestRedis < Test::Unit::TestCase
 
   context "Attributes of type List" do
     setup do
-      @post = Post.new
+      @post = Model::Post.new
       @post.body = "Hello world!"
       @post.create
     end
@@ -484,7 +486,7 @@ class TestRedis < Test::Unit::TestCase
       @post.comments << "2"
       @post.comments << "3"
       @post.save
-      assert_equal ["1", "2", "3"], Post[@post.id].comments.all
+      assert_equal ["1", "2", "3"], Model::Post[@post.id].comments.all
     end
 
     should "respond to each" do
@@ -544,23 +546,23 @@ class TestRedis < Test::Unit::TestCase
     end
 
     should "add models" do
-      @post.related.add(Post.create(:body => "Hello"))
+      @post.related.add(Model::Post.create(:body => "Hello"))
 
       assert_equal ["2"], @post.related.raw
     end
 
     should "find elements in the list" do
-      another_post = Post.create
+      another_post = Model::Post.create
 
       @post.related.add(another_post)
 
       assert  @post.related.include?(another_post)
-      assert !@post.related.include?(Post.create)
+      assert !@post.related.include?(Model::Post.create)
     end
 
     should "unshift models" do
-      @post.related.unshift(Post.create(:body => "Hello"))
-      @post.related.unshift(Post.create(:body => "Goodbye"))
+      @post.related.unshift(Model::Post.create(:body => "Hello"))
+      @post.related.unshift(Model::Post.create(:body => "Goodbye"))
 
       assert_equal ["3", "2"], @post.related.raw
 
@@ -589,19 +591,22 @@ class TestRedis < Test::Unit::TestCase
       end
     end
 
-    class ::Calendar < Ohm::Model
-      list :holidays, lambda { |v| Date.parse(v) }
-      list :subscribers, lambda { |id| MyActiveRecordModel.find(id) }
-      list :appointments, Appointment
+    class ::Model::Appointment < Ohm::Model
     end
 
-    class ::Appointment < Ohm::Model
+    class ::Model::Calendar < Ohm::Model
+      list :holidays, lambda { |v| Date.parse(v) }
+      list :subscribers, lambda { |id| MyActiveRecordModel.find(id) }
+      list :appointments, ::Model::Appointment
+    end
+
+    class ::Model::Appointment
       attribute :text
       reference :subscriber, lambda { |id| MyActiveRecordModel.find(id) }
     end
 
     setup do
-      @calendar = Calendar.create
+      @calendar = Model::Calendar.create
 
       @calendar.holidays.raw << "2009-05-25"
       @calendar.holidays.raw << "2009-07-09"
@@ -617,20 +622,20 @@ class TestRedis < Test::Unit::TestCase
     end
 
     should "allow lambdas in references" do
-      appointment = Appointment.create(:subscriber => MyActiveRecordModel.find(1))
+      appointment = Model::Appointment.create(:subscriber => MyActiveRecordModel.find(1))
       assert_equal MyActiveRecordModel.find(1), appointment.subscriber
     end
 
     should "work with models too" do
-      @calendar.appointments.add(Appointment.create(:text => "Meet with Bertrand"))
+      @calendar.appointments.add(Model::Appointment.create(:text => "Meet with Bertrand"))
 
-      assert_equal [Appointment[1]], Calendar[1].appointments.sort
+      assert_equal [Model::Appointment[1]], Model::Calendar[1].appointments.sort
     end
   end
 
   context "Sorting lists and sets" do
     setup do
-      @post = Post.create(:body => "Lorem")
+      @post = Model::Post.create(:body => "Lorem")
       @post.comments << 2
       @post.comments << 3
       @post.comments << 1
@@ -643,11 +648,11 @@ class TestRedis < Test::Unit::TestCase
 
   context "Sorting lists and sets by model attributes" do
     setup do
-      @event = Event.create(:name => "Ruby Tuesday")
-      @event.attendees << Person.create(:name => "D")
-      @event.attendees << Person.create(:name => "C")
-      @event.attendees << Person.create(:name => "B")
-      @event.attendees << Person.create(:name => "A")
+      @event = Model::Event.create(:name => "Ruby Tuesday")
+      @event.attendees << Model::Person.create(:name => "D")
+      @event.attendees << Model::Person.create(:name => "C")
+      @event.attendees << Model::Person.create(:name => "B")
+      @event.attendees << Model::Person.create(:name => "A")
     end
 
     should "sort the model instances by the values provided" do
@@ -668,21 +673,21 @@ class TestRedis < Test::Unit::TestCase
 
   context "Collections initialized with a Model parameter" do
     setup do
-      @user = User.create(:email => "albert@example.com")
-      @user.posts.add Post.create(:body => "D")
-      @user.posts.add Post.create(:body => "C")
-      @user.posts.add Post.create(:body => "B")
-      @user.posts.add Post.create(:body => "A")
+      @user = Model::User.create(:email => "albert@example.com")
+      @user.posts.add Model::Post.create(:body => "D")
+      @user.posts.add Model::Post.create(:body => "C")
+      @user.posts.add Model::Post.create(:body => "B")
+      @user.posts.add Model::Post.create(:body => "A")
     end
 
     should "return instances of the passed model" do
-      assert_equal Post, @user.posts.first.class
+      assert_equal Model::Post, @user.posts.first.class
     end
   end
 
   context "Counters" do
     setup do
-      @event = Event.create(:name => "Ruby Tuesday")
+      @event = Model::Event.create(:name => "Ruby Tuesday")
     end
 
     should "raise ArgumentError if the attribute is not a counter" do
@@ -708,18 +713,18 @@ class TestRedis < Test::Unit::TestCase
 
   context "Comparison" do
     setup do
-      @user = User.create(:email => "foo")
+      @user = Model::User.create(:email => "foo")
     end
 
     should "be comparable to other instances" do
-      assert_equal @user, User[@user.id]
+      assert_equal @user, Model::User[@user.id]
 
-      assert_not_equal @user, User.create
-      assert_not_equal User.new, User.new
+      assert_not_equal @user, Model::User.create
+      assert_not_equal Model::User.new, Model::User.new
     end
 
     should "not be comparable to instances of other models" do
-      assert_not_equal @user, Event.create(:name => "Ruby Tuesday")
+      assert_not_equal @user, Model::Event.create(:name => "Ruby Tuesday")
     end
 
     should "be comparable to non-models" do
@@ -732,7 +737,7 @@ class TestRedis < Test::Unit::TestCase
   end
 
   context "Debugging" do
-    class ::Bar < Ohm::Model
+    class ::Model::Bar < Ohm::Model
       attribute :name
       counter :visits
       set :friends
@@ -752,9 +757,9 @@ class TestRedis < Test::Unit::TestCase
     end
 
     should "provide a meaningful inspect" do
-      bar = Bar.new
+      bar = Model::Bar.new
 
-      assert_equal "#<Bar:? name=nil friends=nil comments=nil visits=0>", bar.inspect
+      assert_equal "#<Model::Bar:? name=nil friends=nil comments=nil visits=0>", bar.inspect
 
       bar.update(:name => "Albert")
       bar.friends << 1
@@ -762,7 +767,7 @@ class TestRedis < Test::Unit::TestCase
       bar.comments << "A"
       bar.incr(:visits)
 
-      assert_equal %Q{#<Bar:#{bar.id} name="Albert" friends=#<Set: ["1", "2"]> comments=#<List: ["A"]> visits=1>}, Bar[bar.id].inspect
+      assert_equal %Q{#<Model::Bar:#{bar.id} name="Albert" friends=#<Set: ["1", "2"]> comments=#<List: ["A"]> visits=1>}, Model::Bar[bar.id].inspect
     end
 
     def assert_wrapper_exception(&block)
@@ -775,16 +780,16 @@ class TestRedis < Test::Unit::TestCase
     end
 
     should "inform about a miscatch by Wrapper when calling class methods" do
-      assert_wrapper_exception { Bar.new.baz }
+      assert_wrapper_exception { Model::Bar.new.baz }
     end
 
     should "inform about a miscatch by Wrapper when calling instance methods" do
-      assert_wrapper_exception { Bar.new.foo }
+      assert_wrapper_exception { Model::Bar.new.foo }
     end
   end
 
   context "Overwriting write" do
-    class ::Baz < Ohm::Model
+    class ::Model::Baz < Ohm::Model
       attribute :name
 
       def write
@@ -794,78 +799,84 @@ class TestRedis < Test::Unit::TestCase
     end
 
     should "work properly" do
-      baz = Baz.new
+      baz = Model::Baz.new
       baz.name = "Foo"
       baz.save
       baz.name = "Foo"
       baz.save
-      assert_equal "Foobar", Baz[baz.id].name
+      assert_equal "Foobar", Model::Baz[baz.id].name
     end
   end
 
   context "References to other objects" do
-    class ::Note < Ohm::Model
+    class ::Model::Comment < Ohm::Model
+    end
+
+    class ::Model::Rating < Ohm::Model
+    end
+
+    class ::Model::Note < Ohm::Model
       attribute :content
-      reference :source, Post
-      collection :comments, Comment
-      list :ratings, Rating
+      reference :source, Model::Post
+      collection :comments, Model::Comment
+      list :ratings, Model::Rating
     end
 
-    class ::Comment < Ohm::Model
-      reference :note, Note
+    class ::Model::Comment
+      reference :note, Model::Note
     end
 
-    class ::Rating < Ohm::Model
+    class ::Model::Rating
       attribute :value
     end
 
-    class ::Editor < Ohm::Model
+    class ::Model::Editor < Ohm::Model
       attribute :name
-      reference :post, Post
+      reference :post, Model::Post
     end
 
-    class ::Post < Ohm::Model
-      reference :author, Person
-      collection :notes, Note, :source
-      collection :editors, Editor
+    class ::Model::Post < Ohm::Model
+      reference :author, Model::Person
+      collection :notes, Model::Note, :source
+      collection :editors, Model::Editor
     end
 
     setup do
-      @post = Post.create
+      @post = Model::Post.create
     end
 
     context "a reference to another object" do
       should "return an instance of Person if author_id has a valid id" do
-        @post.author_id = Person.create(:name => "Albert").id
+        @post.author_id = Model::Person.create(:name => "Albert").id
         @post.save
-        assert_equal "Albert", Post[@post.id].author.name
+        assert_equal "Albert", Model::Post[@post.id].author.name
       end
 
       should "assign author_id if author is sent a valid instance" do
-        @post.author = Person.create(:name => "Albert")
+        @post.author = Model::Person.create(:name => "Albert")
         @post.save
-        assert_equal "Albert", Post[@post.id].author.name
+        assert_equal "Albert", Model::Post[@post.id].author.name
       end
 
       should "assign nil if nil is passed to author" do
         @post.author = nil
         @post.save
-        assert_nil Post[@post.id].author
+        assert_nil Model::Post[@post.id].author
       end
 
       should "be cached in an instance variable" do
-        @author = Person.create(:name => "Albert")
+        @author = Model::Person.create(:name => "Albert")
         @post.update(:author => @author)
 
         assert_equal @author, @post.author
         assert @post.author.object_id == @post.author.object_id
 
-        @post.update(:author => Person.create(:name => "Bertrand"))
+        @post.update(:author => Model::Person.create(:name => "Bertrand"))
 
         assert_equal "Bertrand", @post.author.name
         assert @post.author.object_id == @post.author.object_id
 
-        @post.update(:author_id => Person.create(:name => "Charles").id)
+        @post.update(:author_id => Model::Person.create(:name => "Charles").id)
 
         assert_equal "Charles", @post.author.name
       end
@@ -873,8 +884,8 @@ class TestRedis < Test::Unit::TestCase
 
     context "a collection of other objects" do
       setup do
-        @note = Note.create(:content => "Interesting stuff", :source => @post)
-        @comment = Comment.create(:note => @note)
+        @note = Model::Note.create(:content => "Interesting stuff", :source => @post)
+        @comment = Model::Comment.create(:note => @note)
       end
 
       should "return a set of notes" do
@@ -887,14 +898,14 @@ class TestRedis < Test::Unit::TestCase
       end
 
       should "return a list of ratings" do
-        @rating = Rating.create(:value => 5)
+        @rating = Model::Rating.create(:value => 5)
         @note.ratings << @rating
 
         assert_equal @rating, @note.ratings.first
       end
 
       should "default to the current class name" do
-        @editor = Editor.create(:name => "Albert", :post => @post)
+        @editor = Model::Editor.create(:name => "Albert", :post => @post)
 
         assert_equal @editor, @post.editors.first
       end
@@ -902,36 +913,39 @@ class TestRedis < Test::Unit::TestCase
   end
 
   context "Models connected to different databases" do
-    class ::Car < Ohm::Model
+    class ::Model::Car < Ohm::Model
       attribute :name
     end
 
-    class ::Make < Ohm::Model
+    class ::Model::Make < Ohm::Model
       attribute :name
     end
 
     setup do
-      Car.connect(:port => 6379, :db => 14)
+      Model::Car.connect(:port => 6379, :db => 14)
     end
 
     teardown do
-      Car.db.flushdb
+      Model::Car.db.flushdb
     end
 
     should "save to the selected database" do
-      car = Car.create(:name => "Twingo")
-      make = Make.create(:name => "Renault")
+      car = Model::Car.create(:name => "Twingo")
+      make = Model::Make.create(:name => "Renault")
 
-      assert_equal 15, Make.db.instance_variable_get("@db")
-      assert_equal 14, Car.db.instance_variable_get("@db")
+      assert_equal ["1"], Redis.new(:db => 15).smembers("Model::Make:all")
+      assert_equal [], Redis.new(:db => 15).smembers("Model::Car:all")
 
-      assert_equal car, Car[1]
-      assert_equal make, Make[1]
+      assert_equal ["1"], Redis.new(:db => 14).smembers("Model::Car:all")
+      assert_equal [], Redis.new(:db => 14).smembers("Model::Make:all")
 
-      Make.db.flushdb
+      assert_equal car, Model::Car[1]
+      assert_equal make, Model::Make[1]
 
-      assert_equal car, Car[1]
-      assert_nil Make[1]
+      Model::Make.db.flushdb
+
+      assert_equal car, Model::Car[1]
+      assert_nil Model::Make[1]
     end
   end
 end
