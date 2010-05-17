@@ -1,0 +1,9 @@
+css:
+  base:
+    - reset.css
+    - main.css
+
+js:
+  base:
+    - jquery-1.4.2.min.js
+    - app.js
