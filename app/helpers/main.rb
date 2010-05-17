@@ -1,7 +1,8 @@
 class Main
   helpers do
-
-    # Your helpers go here. You can also create another file in app/helpers with the same format.
+    # Your helpers go here. You can also create another file in app/helpers
+    # with the same format.
+    #
     # All helpers defined here will be available across all the application.
     #
     # @example A helper method for date formatting.
