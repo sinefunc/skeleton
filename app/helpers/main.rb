@@ -13,6 +13,7 @@ class Main
     # Generate HAML and escape HTML by default.
     def haml(template, options = {}, locals = {})
       options[:escape_html] = true unless options.include?(:escape_html)
+      options[:format] = :html5
       super(template, options, locals)
     end
 
