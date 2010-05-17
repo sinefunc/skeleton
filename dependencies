@@ -2,6 +2,7 @@ test-unit >= 2.0.7
 contest 0.1.3 (test) git://github.com/sinefunc/contest.git
 dependencies git://github.com/djanowski/dependencies.git
 random_data git://github.com/sinefunc/random_data.git
+ffaker http://github.com/EmmanuelOga/ffaker.git
 haml 2.2.22 git://github.com/nex3/haml.git
 monk-glue git://github.com/sinefunc/glue.git
 redis git://github.com/ezmobius/redis-rb.git
