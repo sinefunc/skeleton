@@ -22,3 +22,5 @@ less 1.2.21 git://github.com/cloudhead/less.js.git
 rtopia git://github.com/sinefunc/rtopia.git
 sinatra-security git://github.com/sinefunc/sinatra-security.git
 sinatra-minify git://github.com/sinefunc/sinatra-minify.git
+sinatra-helpers git://github.com/sinefunc/sinatra-helpers.git
+pagination git://github.com/sinefunc/pagination.git
