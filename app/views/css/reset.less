@@ -1,145 +1,35 @@
-html {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent; }
+@import "app/views/css/includes/common.less";
 
-body {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent;
-  line-height: 1; }
+/* Reset */
+div, dl, dt, dd, ul,
+ol, li, form, fieldset,
+input, th, td           { margin: 0; padding: 0; }
+pre, p, blockquote, h1,
+h2, h3, h4, h5, h6      { margin: 1em 0 1em 0; }
+h1, h2, h3, h4, h5, h6  { line-height: 1.3em; margin: 0.8em 0; }
+blockquote              { border-left: solid 2px #ccc; padding: 0 1em; margin-left: 0.2em; color: #888; }
+h1                      { font-size: 1.5em; }
+h2                      { font-size: 1.4em; }
+h3                      { font-size: 1.3em; }
+h4                      { font-size: 1.1em; }
+h5                      { font-size: 0.9em; }
+h6                      { font-size: 0.9em; }
+ol                      { margin-left: 2em; }
 
-div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent; }
+/* UL bullets */
+ul                      { list-style-type: none; }
+li                      { background: url(/images/bullet-small.gif) 5px 4px no-repeat; padding-left: 22px; list-style-type: none; }
 
-blockquote {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent;
-  quotes: none; }
+/* Body & wrapper */
+html, body              { margin: 0; padding: 0; }
+body, td, input,
+textarea                { font-family: @font; font-size: 1em; }
+body                    { font-size: 0.8em; line-height: 1.45em; background: @body-bg; color: @font-color; }
+#all                    { margin: 0 auto; width: auto; position: relative; }
 
-pre, a, abbr, acronym, address, big, cite, code {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent; }
+/* Links */
+a                       { color: @link-color; text-decoration: none; font-weight: bold; }
+a:visited               { color: @link-color * 1.1; }
+a:hover                 { color: @link-color * 0.8; text-decoration: underline; }
+a img                   { border: 0; }
 
-del {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent;
-  text-decoration: line-through; }
-
-dfn, em, font, img {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent; }
-
-ins {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent;
-  text-decoration: none; }
-
-kbd {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent; }
-
-q {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent;
-  quotes: none; }
-
-s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent; }
-
-ol, ul {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent;
-  list-style: none; }
-
-li, fieldset, form, label, legend {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent; }
-
-table {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent;
-  border-collapse: collapse;
-  border-spacing: 0; }
-
-caption, tbody, tfoot, thead, tr, th, td {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent; }
-
-*:focus {
-  outline: 0; }

@@ -1,0 +1,4 @@
+--preset=column
+--selector-width=23
+--no-selector-wrap
+--wrap-width=110

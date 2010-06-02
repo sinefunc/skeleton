@@ -1,0 +1,36 @@
+@import "settings.less";
+
+/* Cross-browser clear fix */
+.clearfix()       { zoom: 1;
+  :after          { content: ''; clear: both; display: block; line-height: 0; height: 0; }
+}
+
+/* Cross-browser border radius */
+.border-radius(@n: 4px) {
+  border-radius: @n;
+  -moz-border-radius: @n;
+  -webkit-border-radius: @n;
+}
+
+/* Cross-browser box shadow */
+.box-shadow(@n: 0px 3px 0px #ffffff) {
+  box-shadow: @n;
+  -moz-box-shadow: @n;
+  -webkit-box-shadow: @n;
+}
+
+/* Cross-browser min-height */
+.min-height(@n: 100%) {
+  min-height: @n;
+  height: auto !important;
+  height: @n;
+}
+
+/* For non-lists like menus */
+.non-list()       {
+  ul, li          { margin: 0; padding: 0; list-style-type: none; display: block; }
+  li              { background-image: none; }
+}                          
+.ul-non-list()    { margin: 0; padding: 0; list-style-type: none; display: block;
+  li              { margin: 0; padding: 0; list-style-type: none; display: block; background-image: none; }
+}
