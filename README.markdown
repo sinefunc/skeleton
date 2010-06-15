@@ -7,10 +7,10 @@ Setup instructions
   First: install Redis 2.0rc1, if you haven't yet.
   http://code.google.com/p/redis/
 
-    wget http://redis.googlecode.com/files/redis-2.0.0-rc1.tar.gz -O - | tar -zxvf -
+    curl http://redis.googlecode.com/files/redis-2.0.0-rc1.tar.gz | tar -zxvf -
     cd redis-2.0.0-rc1
     make
-    sudo cp {redis-server,redis-cli,redis-benchmark,redis-check-aof,redis-check-dump} /usr/local/bin
+    sudo cp redis-{server,cli,benchmark,check-aof,check-dump} /usr/local/bin
     cd ..
     rm -rf redis-2.0.0-rc1
 
@@ -21,17 +21,12 @@ Setup instructions
   Install Ruby 1.9.1 on RVM, if you haven't yet.
 
     rvm install 1.9.1
-    rvm 1.9.1             # Switch to ruby 1.9.1
 
-  Make a gemset for APP_NAME.
+  Create the rvmrc file. From this point forward, doing `cd` to your directory
+  will automatically load Ruby 1.9.1 with the project's gemset, which will be
+  created if it doesn't exist.
 
-    rvm gemset create APP_NAME
-
-  Create the rvmrc file, then switch to the created gemset. From this point
-  forward, doing `cd` to your directory will automatically load Ruby 1.9.1
-  with the new gemset.
-
-    echo rvm 1.9.1@APP_NAME > .rvmrc
+    echo rvm --create use 1.9.1@APP_NAME > .rvmrc
     source .rvmrc
 
   Install some required gems.
@@ -41,6 +36,8 @@ Setup instructions
   Use the Redis sample conf.
 
     cp config/redis/development.example.conf config/redis/development.conf
+    cp config/redis/test.example.conf config/redis/test.conf
+    mkdir -p db/redis/{test,development}
 
 Sample data
 -----------
