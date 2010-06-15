@@ -1,0 +1,15 @@
+en:
+  signup:
+    flash:
+      success: "You have successfully signed up."
+  
+  errors:
+    not_present: "%{field} is required."
+    not_date: "%{field} is invalid."
+    not_email: "%{field} is invalid."
+
+  user:
+    errors:
+      password:
+        not_confirmed: "Passwords do not match."
+

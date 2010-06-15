@@ -24,3 +24,6 @@ sinatra-security git://github.com/sinefunc/sinatra-security.git
 sinatra-minify git://github.com/sinefunc/sinatra-minify.git
 sinatra-helpers git://github.com/sinefunc/sinatra-helpers.git
 pagination git://github.com/sinefunc/pagination.git
+ohm-contrib git://github.com/sinefunc/ohm-contrib.git
+sinatra-i18n git://github.com/sinefunc/sinatra-i18n.git
+i18n 0.4.1

@@ -13,11 +13,19 @@ require "ohm"
 require "haml"
 require "less"
 require "rtopia"
+require "sinatra/security"
+require "sinatra/minify"
+require "sinatra/helpers"
+require "sinatra/i18n"
+require "ohm/contrib"
 
 class Main < Monk::Glue
   set     :app_file, __FILE__
   use     Rack::Session::Cookie
   helpers Rtopia
+
+  register Sinatra::Security, Sinatra::Minify, Sinatra::Helpers,
+           Sinatra::I18n
 end
 
 # Connect to redis database.
