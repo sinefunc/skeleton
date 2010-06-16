@@ -85,6 +85,11 @@ private
   def verify_config(env)
     verify "#{root_path}/config/appconfig.example.yml"
     verify "#{root_path}/config/redis/#{env}.example.conf"
+
+    # Ensure that this database path exists
+    db_path = "#{root_path}/db/redis/#{env}"
+    require 'fileutils'
+    FileUtils.mkdir_p db_path  unless File.directory? db_path
   end
 
   def verify(example)
